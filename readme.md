@@ -20,6 +20,5 @@ Okay so now we've got the grip what we'll do and ye, it'll be a rollercoaster i 
 * TheHive - Case management and alerting system xd
 * ELK - for SIEM dashboard and ye
 * n8n - for log shipping
-* Cassandra - DB for TheHive
 * Evilginx - For phislets and session hijack lol
-* KasmWeb - Victim Machine
+* WebStop - Victim Machine
