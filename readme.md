@@ -22,3 +22,4 @@ Okay so now we've got the grip what we'll do and ye, it'll be a rollercoaster i 
 * n8n - for log shipping
 * Cassandra - DB for TheHive
 * Evilginx - For phislets and session hijack lol
+* KasmWeb - Victim Machine
