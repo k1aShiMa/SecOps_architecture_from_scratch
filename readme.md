@@ -14,3 +14,11 @@ Then I guess i'll use dunno MITRE ATT&CK for TTP purposes, then you can check it
 # Just you know, i'm doing this 'cuz i'm bored like hell, and it's already in my portfolio so ye... it's a kinda similar thing what i had for a time but i never published it to github cuz it didn't wanna work
 
 Okay so now we've got the grip what we'll do and ye, it'll be a rollercoaster i guess but hell ye, mollywood already told everyone that everyone is a bum except him, he's a geek i guess xd
+
+# Technologies Used:
+
+* TheHive - Case management and alerting system xd
+* ELK - for SIEM dashboard and ye
+* n8n - for log shipping
+* Cassandra - DB for TheHive
+* Evilginx - For phislets and session hijack lol
