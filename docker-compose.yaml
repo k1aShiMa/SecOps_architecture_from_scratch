@@ -75,6 +75,23 @@ services:
     networks:
       - cyber-lab
 
+  victim-browser:
+    image: kasmweb/firefox:1.14.0
+    container_name: victim-machine
+    ports:
+      - "6901:6901" # Here's the browser or like the host machine you see
+    environment:
+      - VNC_PW=password
+    volumes:
+      - ./architecture/victim/browser_profile:/home/kasm-user/.mozzila # browser data
+      - ./architecture/victim/logs:/var/log/victim # endpoint logs
+    networks:
+      - cyber-lab
+    # evilginx is the DNS server lol
+    dns:
+      - 172.21.0.2 # Az evilginx konténer fix IP-je a docker hálózaton
+
+
 # You need to take off the comment section from the n8n to use it cuz i already have it xd
 
 networks: # Yes i'm doin a whole architecture on a laptop
