@@ -1,4 +1,4 @@
-# Low Budget Social Engineering Attack
+# SecOps Architecture from Scratch
 
 We'll use docker for hosting these like containers lol
 
