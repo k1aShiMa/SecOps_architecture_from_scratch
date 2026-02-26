@@ -17,7 +17,7 @@ Okay so now we've got the grip what we'll do and ye, it'll be a rollercoaster i 
 
 # Technologies Used:
 
-* TheHive - Case management and alerting system xd
+* DFIR IRIS - Case management and alerting system xd
 * ELK - for SIEM dashboard and ye
 * n8n - for log shipping
 * Evilginx - For phislets and session hijack lol

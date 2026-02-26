@@ -1,8 +1,9 @@
 version: '3.8'
 
 services:
+  # --- LOGGING (Elasticsearch) ---
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.8.23
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.11
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
@@ -16,13 +17,11 @@ services:
       resources:
         limits:
           memory: 2GB
-    volumes:
-      - ./architecture/elasticsearch:/usr/share/elasticsearch/data
     networks:
       - cyber-lab
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:6.8.23
+    image: docker.elastic.co/kibana/kibana:8.19.11
     container_name: kibana
     ports:
       - "5601:5601"
@@ -33,24 +32,33 @@ services:
     networks:
       - cyber-lab
 
-  thehive:
-    image: thehiveproject/thehive:3.5.0
-    container_name: thehive
-    depends_on:
-      - elasticsearch
-      - cassandra
-    ports:
-      - "9000:9000"
-    command:
-      - --search-backend
-      - elasticsearch
-      - --elastic-nodes
-      - elasticsearch:9200
-      - --search-index
-      - thehive
+  # --- IRIS ---
+  db-iris:
+    image: postgres:14-alpine
+    container_name: db-iris
+    environment:
+      - POSTGRES_USER=iris
+      - POSTGRES_PASSWORD=iris_pass
+      - POSTGRES_DB=iris_db
     networks:
       - cyber-lab
 
+  iris:
+    image: donserdal/iris-web-webapp:latest
+    container_name: iris
+    ports:
+      - "8000:8000"
+    environment:
+      - IRIS_DB_HOST=db-iris
+      - IRIS_DB_NAME=iris_db
+      - IRIS_DB_USER=iris
+      - IRIS_DB_PASSWORD=iris_pass
+    depends_on:
+      - db-iris
+    networks:
+      - cyber-lab
+
+  # --- soar ---
   n8n:
      image: n8nio/n8n:latest
      container_name: n8n
@@ -59,16 +67,15 @@ services:
      networks:
        - cyber-lab
 
+  # --- attacker & victim ---
   evilginx:
-    build: ./architecture/evilginx_source
+    image: warhorse/evilginx2
     container_name: evilginx
     stdin_open: true
     tty: true
     ports:
       - "80:80"
       - "443:443"
-    volumes:
-      - ./architecture/evilginx:/root/.evilginx
     networks:
       - cyber-lab
 
@@ -86,13 +93,17 @@ services:
     networks:
       - cyber-lab
 
+  # --- log shipping ---
   filebeat:
-    image: docker.elastic.co/beats/filebeat:6.8.23
+    image: docker.elastic.co/beats/filebeat:8.19.11
     container_name: filebeat
     user: root
+    command: ["--strict.perms=false"]
     volumes:
       - ./architecture/victim/logs:/var/log/victim:ro
       - ./architecture/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     depends_on:
       - elasticsearch
     networks:
