@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  elasticsearch: # elasticsearch like backend
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.9.2
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false # you don't need to login lol
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./architecture/elasticsearch:/usr/share/elasticsearch/data
+    networks:
+      - cyber-lab
+
+  kibana: #kibana install onto a docker container lol
+    image: docker.elastic.co/kibana/kibana:8.9.2
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    networks:
+      - cyber-lab
+
+  cassandra: # cassandra DB for thehive yea we geekin lilbro
+    image: cassandra:4.0
+    container_name: cassandra
+    environment:
+      - CASSANDRA_CLUSTER_NAME=TheHive
+    volumes:
+      - ./architecture/cassandra:/var/lib/cassandra
+    networks:
+      - cyber-lab
+
+  thehive: #thehive case and alerting system lol
+    image: strangebee/thehive:5.2
+    container_name: thehive
+    depends_on:
+      - cassandra
+      - elasticsearch
+    ports:
+      - "9000:9000"
+    environment:
+      - THEHIVE_CASSANDRA_CONTACT_POINTS=cassandra
+      - THEHIVE_INDEX_SEARCH_BACKEND=elasticsearch
+      - THEHIVE_INDEX_SEARCH_HOSTNAME=elasticsearch
+    networks:
+      - cyber-lab
+
+  #n8n:
+    #image: n8nio/n8n:latest #n8n for log shipping lol
+    #container_name: n8n
+    #ports:
+     # - "5678:5678"
+    #networks:
+     # - cyber-lab
+
+  evilginx:
+    build: https://github.com/kgretzky/evilginx2.git # you can use your selfmade image i'm using the stock one
+    container_name: evilginx
+    stdin_open: true
+    tty: true
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./architecture/evilginx:/root/.evilginx
+    networks:
+      - cyber-lab
+
+# You need to take off the comment section from the n8n to use it cuz i already have it xd
+
+networks: # Yes i'm doin a whole architecture on a laptop
+  cyber-lab:
+    driver: bridge
