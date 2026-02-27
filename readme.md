@@ -1,22 +1,49 @@
-# SecOps Architecture from Scratch
+# SecOps Architecture from Scratch (AiTM & IR Automation)
 
-We'll use docker for hosting these like containers lol
+### Project Vision
+This project is a high-fidelity simulation of a modern enterprise security environment. It demonstrates an end-to-end Adversary-in-the-Middle (AiTM) attack chain and a corresponding, automated Security Operations (SecOps) pipeline for detection and case management.
 
-Then I guess i'll use dunno MITRE ATT&CK for TTP purposes, then you can check it in the MITRE map or something
+The goal is to prove that traditional MFA is insufficient against proxy-based attacks and to showcase how automation (SOAR) can bridge the gap between detection and incident response.
 
-# Used TTPs
+---
 
-* T1589 - Recon Phase: Gather Victim Identity Information through social media like linkedin or the dunno list of names
-* T1583.001 - Resource Development: Domestic Domains We'll use like a fake domain, y'know like not egyetem.com it's like dunno egyetem1.com
-* T1566.002 - Initial Access: Like we'll get a grip on the users creds or something, it's like a spearphishing attack in this case
-* T1557.002 - Credential Access: AiTM like Adversary in the middle attack type, if you don't know it just look it up with your favourite search engine
+### System Architecture
+The entire ecosystem is containerized using Docker, ensuring a portable and isolated lab environment.
 
-# i'm just bored
+#### Defensive Stack (The SOC)
+* ELK Stack (Elasticsearch, Logstash, Kibana): Centralized SIEM for log aggregation, analysis, and security visualization.
+* n8n: The automation engine acting as a lightweight SOAR platform. It parses attack telemetry and orchestrates the alerting flow.
+* DFIR IRIS: A professional-grade Case Management System used to track incidents and manage evidence.
 
-# Technologies Used:
+#### Offensive Stack (The Adversary)
+* Evilginx2: Advanced man-in-the-middle attack framework used for transparent proxying and session hijacking (MFA Bypass).
+* WebStop: A dedicated victim container used to simulate realistic user behavior and endpoint telemetry.
 
-* DFIR IRIS - Case management and alerting system xd
-* ELK - for SIEM dashboard and ye
-* n8n - for log shipping
-* Evilginx - for phislets and session hijack lol
-* WebStop - Victim Machine
+---
+
+### MITRE ATT&CK Mapping
+
+| Tactics | ID | Technique | Description |
+| :--- | :--- | :--- | :--- |
+| Reconnaissance | T1589 | Gather Victim Identity Information | Identification of targets via OSINT (LinkedIn/Employee lists). |
+| Resource Development | T1583.001 | Domestic Domains | Orchestrating typosquatted infrastructure (e.g., egyetem1.com). |
+| Initial Access | T1566.002 | Spearphishing Link | Delivery of the malicious proxy-link to the target. |
+| Credential Access | T1557.002 | Adversary-in-the-Middle | Real-time interception of credentials and session tokens. |
+
+---
+
+### Automated Workflow (The Pipeline)
+1. Exploitation: Evilginx captures a successful login and exports the session cookie.
+2. Log Shipping: Raw attack logs are ingested by the n8n workflow.
+3. Parsing & Enrichment: n8n extracts key IoCs (IP addresses, User-Agents, Timestamps).
+4. Alerting: n8n triggers a webhook to DFIR IRIS, automatically creating a new Case for the SOC team.
+5. Visualization: Kibana dashboards display the frequency and origin of the AiTM traffic for real-time monitoring.
+
+---
+
+### Technologies Used
+* Virtualization: Docker / Docker-Compose
+* SIEM: Elasticsearch 8.x
+* Automation: n8n (Workflow-based)
+* Case Management: DFIR IRIS
+* Attack Framework: Evilginx2
