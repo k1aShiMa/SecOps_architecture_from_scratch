@@ -11,3 +11,10 @@ architecture/victim/logs/
 # OS specific trash lol
 .DS_Store
 *.swp
+
+# asdasd
+git add -f architecture/elasticsearch/data/.gitkeep
+git add -f architecture/n8n/data/.gitkeep
+git add -f architecture/iris/db_data/.gitkeep
+git add -f architecture/victim/logs/.gitkeep
+git add -f architecture/victim/config/.gitkeep
