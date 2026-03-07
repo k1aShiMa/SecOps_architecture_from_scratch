@@ -6,7 +6,7 @@ architecture/victim/config/
 architecture/victim/logs/
 
 # gitkeep stays cuz we need that lol
-!**/ .gitkeep
+!**/.gitkeep
 
 # OS specific trash lol
 .DS_Store
