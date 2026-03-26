@@ -1,0 +1,14 @@
+# xd
+architecture/elasticsearch/data/
+architecture/n8n/data/
+architecture/evilginx/
+architecture/victim/config/
+architecture/victim/logs/
+
+# gitkeep stays cuz we need that lol
+!**/.gitkeep
+
+# OS specific trash lol
+.DS_Store
+*.swp
+*.crt

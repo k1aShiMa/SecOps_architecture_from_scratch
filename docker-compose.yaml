@@ -1,0 +1,123 @@
+version: '3.8'
+
+services:
+  # --- LOGGING (Elasticsearch) ---
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.11
+    container_name: elasticsearch
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    deploy:
+      resources:
+        limits:
+          memory: 2GB
+    volumes:
+      - ./architecture/elasticsearch/data:/usr/share/elasticsearch/data
+    networks:
+      - cyber-lab
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.19.11
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    networks:
+      - cyber-lab
+
+  # --- soar a.k.a n8n ---
+  n8n:
+     image: n8nio/n8n:latest
+     container_name: n8n
+     ports:
+       - "5678:5678"
+     networks:
+       - cyber-lab
+     volumes:
+       - ./architecture/n8n/data:/home/node/.n8n
+
+  # --- attacker & victim ---
+  evilginx:
+    image: heywoodlh/evilginx2:3.3.0
+    container_name: evilginx
+    command: -developer
+    stdin_open: true
+    tty: true
+    ports:
+      - "80:80"
+      - "443:443"
+      - "53:53"
+    volumes:
+      - ./architecture/evilginx/config:/config
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    networks:
+      - cyber-lab
+
+  victim-machine:
+    image: lscr.io/linuxserver/webtop:ubuntu-xfce
+    container_name: victim-machine
+    security_opt:
+      - seccomp:unconfined
+    ports:
+      - "3000:3000"
+    shm_size: "1gb"
+    volumes:
+      - ./architecture/victim/config:/config
+      - ./architecture/victim/logs:/var/log/victim_activity
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    networks:
+      - cyber-lab
+
+  # --- log shipping ---
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.19.11
+    container_name: filebeat
+    user: root
+    command: ["--strict.perms=false"]
+    volumes:
+      - ./architecture/victim/logs:/usr/share/filebeat/victim_logs:ro
+      - ./architecture/victim/config/chromium-profile:/usr/share/filebeat/victim_logs/chromium:ro
+      - ./architecture/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    networks:
+      - cyber-lab
+
+  # --- live logging ---
+  packetbeat:
+    image: docker.elastic.co/beats/packetbeat:8.19.11
+    container_name: packetbeat
+    user: root
+    privileged: true
+    network_mode: host
+    volumes:
+      - ./architecture/packetbeat/packetbeat.yml:/usr/share/packetbeat/packetbeat.yml:ro
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    command: ["packetbeat", "-e", "-t", "--strict.perms=false"]
+    environment:
+      - ELASTICSEARCH_HOSTS=http://127.0.0.1:9200
+    depends_on:
+      - elasticsearch
+
+networks:
+  cyber-lab:
+    driver: bridge

@@ -1,0 +1,24 @@
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /usr/share/filebeat/victim_logs/*.log
+    - /usr/share/filebeat/victim_logs/**/*.log
+    - /usr/share/filebeat/victim_config/chromium/chrome_debug.log
+
+
+  multiline.pattern: '^\[[0-9]'
+  multiline.negate: true
+  multiline.match: after
+
+  fields:
+    log_source: chromium_browser
+    log_type: browser_activity
+
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+
+setup.kibana:
+  host: "kibana:5601"
+
+setup.dashboards.enabled: true
