@@ -46,6 +46,7 @@ The entire ecosystem is containerized using Docker, ensuring a portable and isol
 The selection of these specific technologies wasn't accidental, it was driven by a need for high performance on a "shoestring" budget. Essentially only 7.5GB of RAM is available
 
 * **Logstash vs. Filebeat**: Logstash was dropped from the final architecture because it is a notorious RAM-hog. In a containerized lab, efficiency is king. **Filebeat** is the superior choice here, it’s incredibly lightweight, fast, and does the job with a fraction of the footprint. It's the "geek's choice" for shipping logs without melting your CPU.
+* **Packetbeat**: I couldn't find any better idea to monitor the traffic in this project.
 * **The "Cheap-Ops" Advantage**: This entire SecOps pipeline is built using open-source or community-tier tools. It proves that you don't need a six-figure licensing deal with a legacy vendor to build a world-class detection engine.
 * **Scalability on Demand**: Because everything is containerized and uses modular tools like n8n and Elasticsearch, the architecture scales horizontally. Whether you are monitoring one container or a hundred, the pipeline holds up without breaking the bank.
 
@@ -53,7 +54,7 @@ The selection of these specific technologies wasn't accidental, it was driven by
 
 ### Technologies Used
 * **SIEM**: Elasticsearch (The Brain)
-* **Shipper**: Filebeat (The lightweight goat)
+* **Shipper**: Filebeat & Packetbeat (The lightweight goats)
 * **SOAR**: n8n (Orchestrating the pain)
 * **Case Management**: DFIR-IRIS (Backbone of the alert & case management)
 * **Attack**: Evilginx2 (MFA? What MFA?)
@@ -79,6 +80,16 @@ The selection of these specific technologies wasn't accidental, it was driven by
 **Final Note on Deployment & Scaling**: This stack is provided as a functional blueprint. To make it operational, you'll need to tailor the configurations to your specific environment — if you don't tune it, it won't work. While this "Cheap-Ops" architecture is designed to scale into a full-blown enterprise SOC, doing so requires significant resources that exceed my current 7.5GB RAM lab constraints. It's built to be big, just give it the iron to run on.
 
 **Another Note for n8n**: The automation flows (playbooks) are left for you to build. Instead of providing pre-baked JSONs, I’ve laid out the directory structure for the whole operation. Build your own logic, trigger your own alerts the infrastructure is ready, the automation brain is up to you.
+
+---
+
+### Deployment Notes: 2026.03.26
+
+**Packetbeat**: The stack now integrates Packetbeat to provide deep visibility into network-level telemetry, addressing the inherent limitations of file-based monitoring (Filebeat) for real-time traffic analysis. While Auditbeat was initially evaluated for endpoint auditing, the current Windows-based host environment presented permission constraints that hindered its effectiveness. Consequently, Packetbeat was selected as the primary engine for wire-protocol analysis.
+
+* **Next Phase**: Engineering custom detection rules within the SIEM to validate the end-to-end telemetry pipeline and stress-test the detection logic.
+
+**SOAR & Orchestration Strategy**: Development is shifting toward the SOAR layer and automated data pipelines. To maintain the "Build-Your-Own-Logic" philosophy of this lab, raw n8n JSON exports will not be provided. Instead, the repository will be updated with high-resolution architectural screenshots of the workflows. This approach ensures that you understand the operational flow and dependencies before manually configuring the automation to suit your specific environment.
 
 ---
 
