@@ -1,6 +1,6 @@
-packetbeat.interfaces.device: br-1040ff292ecb
+packetbeat.interfaces.device: br-0086e34288c2
 
-packetbeat.interfaces.bpf_filter: "net 172.18.0.0/16"
+packetbeat.interfaces.bpf_filter: "host 172.18.0.2"
 
 packetbeat.protocols:
   - type: dns
@@ -8,8 +8,9 @@ packetbeat.protocols:
     include_authorities: true
   - type: http
     ports: [80, 8080, 3000]
-    include_body_for: ["text/html", "application/json", "application/x-www-form-urlencoded"]
+    include_body_for: ["text/html", "application/json"]
     hide_keywords: ["image", "css", "js", "woff", "png", "svg"]
+    send_headers: ["Host", "Referer", "User-Agent", "Location"]
   - type: tls
     ports: [443]
 

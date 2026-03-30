@@ -1,0 +1,27 @@
+title: Potential Evilginx Phishing Lure Detected
+id: 5b2e1f3a-8c9d-4e2b-a1b2-c3d4e5f6g7h8
+status: experimental
+description: Detects suspicious HTTP referer and host headers often used in Evilginx-based proxy phishing attacks.
+author: k1aShiMa
+date: 2026/03/30
+logsource:
+    category: network
+    product: packetbeat
+detection:
+    selection_evilginx_patterns:
+        http.request.headers.referer|contains:
+            - 'login-microsoft'
+            - 'verify-account'
+            - 'secure-session'
+            - 'update-password'
+    selection_mismatch:
+        http.request.headers.host: 'login.microsoftonline.com'
+    filter_legit:
+        http.request.headers.referer|contains:
+            - '.microsoft.com'
+            - '.office.com'
+    condition: selection_evilginx_patterns or (selection_mismatch and not filter_legit)
+falsepositives:
+    - Internal application redirects
+    - Legitimate third-party authentication providers
+level: high
